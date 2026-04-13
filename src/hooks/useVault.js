@@ -66,35 +66,68 @@ export const useVault = () => {
         type: "pdf",
         size: "4.2 MB",
         subject: "Machine Learning",
-        tags: ["Core", "Intro"],
-        preview: "Supervised vs Unsupervised learning overview..."
+        tags: ["Core", "Intro", "Neural"],
+        preview: "Supervised vs unsupervised learning, feature spaces, and practical model evaluation..."
       },
       {
         name: "OS Kernel Architecture.mp4",
         type: "video",
         size: "128 MB",
         subject: "Operating Systems",
-        tags: ["Lecture", "Kernel"],
-        preview: "Detailed breakdown of monolithic vs microkernels..."
+        tags: ["Lecture", "Kernel", "Systems"],
+        preview: "Detailed breakdown of monolithic vs microkernels, scheduling, and protection boundaries..."
       },
       {
-        name: "DataStructures_Final_Review.txt",
+        name: "Deadlock Recovery Lab Notes.md",
         type: "text",
-        size: "15 KB",
-        subject: "Data Structures",
-        tags: ["Exam", "Review"],
-        preview: "Complexity analysis of tree balancing algorithms..."
+        size: "21 KB",
+        subject: "Operating Systems",
+        tags: ["Lab", "Deadlocks", "Review"],
+        preview: "Deadlock detection graphs, recovery heuristics, and starvation trade-offs..."
       },
       {
-        name: "sorting_algorithms.py",
+        name: "Recursion_Patterns.cpp",
         type: "code",
-        size: "8 KB",
-        subject: "Computer Science",
-        tags: ["Python", "Algorithms"],
-        preview: "def quicksort(arr): # Optimized pivot selection..."
+        size: "11 KB",
+        subject: "Data Structures",
+        tags: ["C++", "Recursion", "DSA"],
+        preview: "int solve(int n) { /* recursive state transitions with memoization hooks */ }"
+      },
+      {
+        name: "Backpropagation Debug Walkthrough.mp4",
+        type: "video",
+        size: "164 MB",
+        subject: "Machine Learning",
+        tags: ["Lecture", "Gradients", "ML"],
+        preview: "Vanishing gradient intuition, activation choices, and debugging unstable training runs..."
+      },
+      {
+        name: "Gradient_Descent_Debugger.py",
+        type: "code",
+        size: "9 KB",
+        subject: "Machine Learning",
+        tags: ["Python", "Optimization", "ML"],
+        preview: "def train_step(weights, batch): # gradient inspection and clipping strategy..."
+      },
+      {
+        name: "Graph_Traversal_Cheat_Sheet.pdf",
+        type: "pdf",
+        size: "1.8 MB",
+        subject: "Data Structures",
+        tags: ["Graphs", "Revision", "DSA"],
+        preview: "BFS, DFS, shortest paths, and adjacency list trade-offs for exam recall..."
       }
     ];
-    samples.forEach(sample => addItem(sample));
+
+    const existingNames = new Set(items.map(item => item.name));
+    const newSamples = samples.filter(sample => !existingNames.has(sample.name));
+
+    if (newSamples.length === 0) {
+      addHistoryEvent('SYSTEM', { message: 'Sample course pack already indexed' });
+      return;
+    }
+
+    newSamples.forEach(sample => addItem(sample));
     addHistoryEvent('SYSTEM', { message: 'Sample course pack loaded' });
   };
 

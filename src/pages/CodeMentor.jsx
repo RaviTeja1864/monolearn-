@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Code2, 
   Bug, 
@@ -16,9 +16,27 @@ import {
   Info
 } from 'lucide-react';
 import { cn } from '../utils/cn';
+import { clearPendingIntent, getPendingIntent } from '../utils/studyIntent';
 
 const CodeMentor = () => {
-  const [code, setCode] = useState(`def fibonacci(n):
+  const createCodeContext = useCallback((item) => {
+    if (item.type === 'code') {
+      return `# Loaded from ${item.name}\n# Subject: ${item.subject}\n\n${item.preview || '# Neural preview unavailable'}`;
+    }
+
+    return `# Context lifted from ${item.name}\n# Subject: ${item.subject}\n# Type: ${item.type}\n\n"""\n${item.preview || 'No preview available yet.'}\n"""\n\n# Ask Code Mentor to extract patterns, pseudocode, or implementation guidance from this source.`;
+  }, []);
+
+  const [initialIntent] = useState(() => {
+    const intent = getPendingIntent();
+    return intent?.page === 'code' ? intent : null;
+  });
+  const [code, setCode] = useState(() => {
+    if (initialIntent?.payload?.item) {
+      return createCodeContext(initialIntent.payload.item);
+    }
+
+    return `def fibonacci(n):
     if n <= 0:
         return 0
     elif n == 1:
@@ -28,13 +46,23 @@ const CodeMentor = () => {
         return fibonacci(n-1) + fibonacci(n-2)
 
 # Example usage
-print(fibonacci(10))`);
+print(fibonacci(10))`;
+  });
   
   const [language, setLanguage] = useState('python');
   const [activeTab, setActiveTab] = useState('explain');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [isCopied, setIsCopied] = useState(false);
+  const [handoffNotice, setHandoffNotice] = useState(
+    initialIntent?.payload?.notice || '',
+  );
+
+  useEffect(() => {
+    if (initialIntent) {
+      clearPendingIntent();
+    }
+  }, [initialIntent]);
 
   const handleAnalyze = () => {
     setIsAnalyzing(true);
@@ -93,6 +121,18 @@ print(fibonacci(100))`;
 
   return (
     <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {handoffNotice && (
+        <div className="flex items-center justify-between gap-4 rounded-2xl border border-emerald-500/15 bg-emerald-500/8 px-4 py-3 text-[12px] text-emerald-100/90 animate-in fade-in slide-in-from-top-2 duration-300">
+          <p>{handoffNotice}</p>
+          <button
+            onClick={() => setHandoffNotice('')}
+            className="text-emerald-100/70 transition-colors hover:text-emerald-100"
+          >
+            <XCircle className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full min-h-[700px]">
         {/* Editor Section */}
         <div className="flex flex-col h-full bg-card border border-border/40 rounded-3xl shadow-sm overflow-hidden">

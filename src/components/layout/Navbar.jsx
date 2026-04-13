@@ -1,6 +1,5 @@
 import React from 'react';
 import { Sun, Moon, Sparkles } from 'lucide-react';
-import { cn } from '../../utils/cn';
 
 const Navbar = ({ activePage, theme, toggleTheme, onLogoClick, status = 'Ready' }) => {
   const getPageTitle = () => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { MessageCircle, GraduationCap } from 'lucide-react';
 import { useTheme } from './hooks/useTheme';
 import Sidebar from './components/layout/Sidebar';
@@ -24,10 +24,36 @@ function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [status, setStatus] = useState('Ready');
   const [isGlobalTutorOpen, setIsGlobalTutorOpen] = useState(false);
+  const statusResetRef = useRef(null);
 
   useEffect(() => {
     localStorage.setItem('solo-tutor-started', isStarted);
   }, [isStarted]);
+
+  const handleNavigationIntent = useCallback((event) => {
+    const { page, status: nextStatus } = event.detail || {};
+
+    if (page) {
+      setActivePage(page);
+    }
+
+    if (nextStatus) {
+      setStatus(nextStatus);
+      window.clearTimeout(statusResetRef.current);
+      statusResetRef.current = window.setTimeout(() => {
+        setStatus('Ready');
+      }, 4200);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('studyos:navigate', handleNavigationIntent);
+
+    return () => {
+      window.removeEventListener('studyos:navigate', handleNavigationIntent);
+      window.clearTimeout(statusResetRef.current);
+    };
+  }, [handleNavigationIntent]);
 
   const renderPage = () => {
     switch (activePage) {

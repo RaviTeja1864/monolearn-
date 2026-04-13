@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   HelpCircle, 
   Sparkles, 
@@ -16,63 +16,86 @@ import {
   ChevronLeft
 } from 'lucide-react';
 import { useVault } from '../hooks/useVault';
+import { clearPendingIntent, getPendingIntent } from '../utils/studyIntent';
 import { cn } from '../utils/cn';
+
+const buildQuizQuestions = (subjectFocus) => {
+  const mockQuestions = [
+    {
+      id: 1,
+      subject: 'Data Structures',
+      question: "Which of the following describes the time complexity of a recursive Fibonacci function without memoization?",
+      options: ["O(n)", "O(log n)", "O(2^n)", "O(n log n)"],
+      correct: 2,
+      explanation: "Each call results in two more recursive calls, leading to exponential growth in the total number of calls.",
+      source: "sorting_algorithms.py"
+    },
+    {
+      id: 2,
+      subject: 'Operating Systems',
+      question: "What is the primary difference between a Monolithic Kernel and a Microkernel?",
+      options: [
+        "Monolithic kernels are faster but harder to debug",
+        "Microkernels run all services in user space",
+        "Monolithic kernels are smaller in size",
+        "Microkernels are inherently less secure"
+      ],
+      correct: 1,
+      explanation: "Microkernels minimize the code running in kernel space, moving services like file systems and drivers to user space.",
+      source: "OS Kernel Architecture.mp4"
+    },
+    {
+      id: 3,
+      subject: 'Machine Learning',
+      question: "In supervised learning, what is the main goal of the model?",
+      options: [
+        "To find hidden patterns in unlabeled data",
+        "To learn a mapping from input features to output labels",
+        "To maximize a reward signal in an environment",
+        "To reduce the dimensionality of the input space"
+      ],
+      correct: 1,
+      explanation: "Supervised learning uses labeled training data to learn a function that can predict outcomes for new, unseen data.",
+      source: "Machine Learning Foundations.pdf"
+    }
+  ];
+
+  if (subjectFocus === 'all') {
+    return mockQuestions;
+  }
+
+  const narrowed = mockQuestions.filter((question) => question.subject === subjectFocus);
+  return narrowed.length > 0 ? narrowed : mockQuestions;
+};
 
 const QuizLab = () => {
   const { items } = useVault();
+  const [initialIntent] = useState(() => {
+    const intent = getPendingIntent();
+    return intent?.page === 'quiz' ? intent : null;
+  });
+  const initialSubject = initialIntent?.payload?.subject || 'all';
+  const shouldStartWithQuiz = Boolean(initialIntent?.payload?.autoGenerate && items.length > 0);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [quizStarted, setQuizStarted] = useState(false);
+  const [quizStarted, setQuizStarted] = useState(shouldStartWithQuiz);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
   const [showExplanation, setShowExplanation] = useState(false);
-  const [quizData, setQuizData] = useState([]);
+  const [quizData, setQuizData] = useState(() => (shouldStartWithQuiz ? buildQuizQuestions(initialSubject) : []));
   const [mastery, setMastery] = useState(0);
-  const [selectedSubject, setSelectedSubject] = useState('all');
+  const [selectedSubject, setSelectedSubject] = useState(initialSubject);
+  const [handoffNotice, setHandoffNotice] = useState(
+    initialIntent?.payload?.notice || '',
+  );
 
   const subjects = ['all', ...new Set(items.map(item => item.subject).filter(Boolean))];
 
-  const handleGenerate = () => {
+  const generateQuiz = useCallback((subjectFocus = selectedSubject) => {
     setIsGenerating(true);
+
     setTimeout(() => {
-      const mockQuestions = [
-        {
-          id: 1,
-          question: "Which of the following describes the time complexity of a recursive Fibonacci function without memoization?",
-          options: ["O(n)", "O(log n)", "O(2^n)", "O(n log n)"],
-          correct: 2,
-          explanation: "Each call results in two more recursive calls, leading to exponential growth in the total number of calls.",
-          source: "sorting_algorithms.py"
-        },
-        {
-          id: 2,
-          question: "What is the primary difference between a Monolithic Kernel and a Microkernel?",
-          options: [
-            "Monolithic kernels are faster but harder to debug",
-            "Microkernels run all services in user space",
-            "Monolithic kernels are smaller in size",
-            "Microkernels are inherently less secure"
-          ],
-          correct: 1,
-          explanation: "Microkernels minimize the code running in kernel space, moving services like file systems and drivers to user space.",
-          source: "OS Kernel Architecture.mp4"
-        },
-        {
-          id: 3,
-          question: "In supervised learning, what is the main goal of the model?",
-          options: [
-            "To find hidden patterns in unlabeled data",
-            "To learn a mapping from input features to output labels",
-            "To maximize a reward signal in an environment",
-            "To reduce the dimensionality of the input space"
-          ],
-          correct: 1,
-          explanation: "Supervised learning uses labeled training data to learn a function that can predict outcomes for new, unseen data.",
-          source: "Machine Learning Foundations.pdf"
-        }
-      ];
-      
-      setQuizData(mockQuestions);
+      setQuizData(buildQuizQuestions(subjectFocus));
       setQuizStarted(true);
       setIsGenerating(false);
       setCurrentQuestionIndex(0);
@@ -80,7 +103,17 @@ const QuizLab = () => {
       setSelectedOption(null);
       setShowExplanation(false);
     }, 1500);
-  };
+  }, [selectedSubject]);
+
+  const handleGenerate = useCallback(() => {
+    generateQuiz(selectedSubject);
+  }, [generateQuiz, selectedSubject]);
+
+  useEffect(() => {
+    if (initialIntent) {
+      clearPendingIntent();
+    }
+  }, [initialIntent]);
 
   const handleOptionSelect = (idx) => {
     if (selectedOption !== null) return;
@@ -114,6 +147,18 @@ const QuizLab = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Quiz Header Stats */}
+      {handoffNotice && (
+        <div className="flex items-center justify-between gap-4 rounded-2xl border border-violet-500/15 bg-violet-500/8 px-4 py-3 text-[12px] text-violet-100/90 animate-in fade-in slide-in-from-top-2 duration-300">
+          <p>{handoffNotice}</p>
+          <button
+            onClick={() => setHandoffNotice('')}
+            className="text-violet-100/70 transition-colors hover:text-violet-100"
+          >
+            <XCircle className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
       {!isGenerating && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-card border border-border/40 rounded-3xl p-6 shadow-sm flex items-center gap-4">

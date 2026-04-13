@@ -1,5 +1,5 @@
 import React from 'react';
-import { 
+import {
   Sparkles, 
   ShieldCheck, 
   Zap, 
@@ -13,7 +13,6 @@ import {
   Globe,
   Lock
 } from 'lucide-react';
-import { cn } from '../utils/cn';
 
 const ScrollingText = () => {
   const items = [

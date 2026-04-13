@@ -15,22 +15,42 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { useVault } from '../hooks/useVault';
+import { clearPendingIntent, getPendingIntent } from '../utils/studyIntent';
 import { cn } from '../utils/cn';
 
 const KnowledgeChat = () => {
   const { items } = useVault();
+  const [initialIntent] = useState(() => {
+    const intent = getPendingIntent();
+    return intent?.page === 'chat' ? intent : null;
+  });
   const [messages, setMessages] = useState([
     {
       id: 'welcome',
       role: 'assistant',
       content: "Hello! I'm your StudyOS tutor. Select some materials from your vault, and I'll help you understand them with citations.",
       timestamp: new Date()
-    }
+    },
+    ...(initialIntent?.payload?.message
+      ? [{
+          id: initialIntent.id,
+          role: 'assistant',
+          content: initialIntent.payload.message,
+          timestamp: new Date(),
+        }]
+      : []),
   ]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState(initialIntent?.payload?.prompt || '');
   const [isThinking, setIsThinking] = useState(false);
-  const [selectedContext, setSelectedContext] = useState([]);
+  const [selectedContext, setSelectedContext] = useState(() => {
+    if (!initialIntent?.payload?.itemIds?.length) {
+      return [];
+    }
+
+    return items.filter((item) => initialIntent.payload.itemIds.includes(item.id));
+  });
   const [showVaultSelector, setShowVaultSelector] = useState(false);
+  const [handoffNotice, setHandoffNotice] = useState(initialIntent?.payload?.notice || '');
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -40,6 +60,12 @@ const KnowledgeChat = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isThinking]);
+
+  useEffect(() => {
+    if (initialIntent) {
+      clearPendingIntent();
+    }
+  }, [initialIntent]);
 
   const handleSend = async () => {
     if (!input.trim() || isThinking) return;
@@ -97,6 +123,18 @@ const KnowledgeChat = () => {
   return (
     <div className="flex flex-col h-[calc(100vh-160px)] max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Context Bar */}
+      {handoffNotice && (
+        <div className="mb-4 flex items-center justify-between gap-4 rounded-2xl border border-sky-500/15 bg-sky-500/8 px-4 py-3 text-[12px] text-sky-100/90 animate-in fade-in slide-in-from-top-2 duration-300">
+          <p>{handoffNotice}</p>
+          <button
+            onClick={() => setHandoffNotice('')}
+            className="text-sky-100/70 transition-colors hover:text-sky-100"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
       <div className="flex items-center gap-3 pb-4 border-b border-border/40 overflow-x-auto no-scrollbar">
         <button 
           onClick={() => setShowVaultSelector(!showVaultSelector)}
