@@ -20,7 +20,7 @@ import { cn } from '../../utils/cn';
 const GlobalTutorModal = ({ isOpen, onClose }) => {
   const { items } = useVault();
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: "I'm your Global StudyOS Assistant. I have access to your entire vault. How can I help you today?" }
+    { role: 'assistant', content: "I'm your SOLO TUTOR assistant. I have access to your entire vault. How can I help you today?" }
   ]);
   const [input, setInput] = useState('');
   const [isThinking, setIsThinking] = useState(false);

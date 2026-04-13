@@ -1,6 +1,6 @@
 # SOLO TUTOR (LearnVault)
 
-An AI-Powered Personal Learning OS built for 2026. This platform is a browser-only interactive prototype designed for deep focus and high-performance learning.
+An AI-powered personal learning OS for 2026. SOLO TUTOR is a local-first interactive prototype focused on deep work, premium knowledge tooling, and live video transcript intelligence.
 
 ## 🚀 Features
 
@@ -21,7 +21,7 @@ An AI-Powered Personal Learning OS built for 2026. This platform is a browser-on
 
 ## 🔒 Privacy & Security
 
-Solo Tutor operates on a "Local-First" AI philosophy. All data processing and AI intelligence happen directly in your browser. No data ever leaves your device.
+Solo Tutor operates on a local-first philosophy. Vault data stays in local browser storage, while features like YouTube transcript analysis make live external requests only when you trigger them.
 
 ## 📖 Getting Started
 

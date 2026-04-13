@@ -1,22 +1,28 @@
 import { useState, useEffect } from 'react';
 
+const VAULT_KEY = 'solo-tutor-vault';
+const LEGACY_VAULT_KEY = 'studyos-vault';
+const HISTORY_KEY = 'solo-tutor-vault-history';
+const LEGACY_HISTORY_KEY = 'studyos-vault-history';
+
 export const useVault = () => {
   const [items, setItems] = useState(() => {
-    const saved = localStorage.getItem('studyos-vault');
+    const saved = localStorage.getItem(VAULT_KEY) || localStorage.getItem(LEGACY_VAULT_KEY);
     return saved ? JSON.parse(saved) : [];
   });
 
   const [history, setHistory] = useState(() => {
-    const saved = localStorage.getItem('studyos-vault-history');
+    const saved =
+      localStorage.getItem(HISTORY_KEY) || localStorage.getItem(LEGACY_HISTORY_KEY);
     return saved ? JSON.parse(saved) : [];
   });
 
   useEffect(() => {
-    localStorage.setItem('studyos-vault', JSON.stringify(items));
+    localStorage.setItem(VAULT_KEY, JSON.stringify(items));
   }, [items]);
 
   useEffect(() => {
-    localStorage.setItem('studyos-vault-history', JSON.stringify(history));
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
   }, [history]);
 
   const addHistoryEvent = (type, details) => {

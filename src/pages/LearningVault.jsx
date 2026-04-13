@@ -24,7 +24,8 @@ import { useVault } from '../hooks/useVault';
 import { dispatchNavigationIntent } from '../utils/studyIntent';
 import { cn } from '../utils/cn';
 
-const STUDY_QUEUE_STORAGE_KEY = 'studyos-study-session-queue';
+const STUDY_QUEUE_STORAGE_KEY = 'solo-tutor-study-session-queue';
+const LEGACY_STUDY_QUEUE_STORAGE_KEY = 'studyos-study-session-queue';
 
 const filterOptions = [
   { id: 'all', label: 'All' },
@@ -42,7 +43,9 @@ const viewOptions = [
 
 const readStoredQueue = () => {
   try {
-    const raw = localStorage.getItem(STUDY_QUEUE_STORAGE_KEY);
+    const raw =
+      localStorage.getItem(STUDY_QUEUE_STORAGE_KEY) ||
+      localStorage.getItem(LEGACY_STUDY_QUEUE_STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
@@ -255,14 +258,14 @@ const LearningVault = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `studyos-vault-export-${new Date().toISOString().slice(0, 10)}.json`;
+    link.download = `solo-tutor-vault-export-${new Date().toISOString().slice(0, 10)}.json`;
     link.click();
     URL.revokeObjectURL(url);
 
     setCommandFeedback({
       title: 'Vault export generated',
       summary: `Exported ${scope.length} indexed asset${scope.length === 1 ? '' : 's'} as a portable JSON snapshot.`,
-      description: 'You now have a browser-only backup of the active vault scope.',
+      description: 'You now have a portable local backup of the active vault scope.',
       pills: ['Portable Snapshot', 'JSON'],
     });
   }, []);
@@ -644,7 +647,7 @@ const LearningVault = () => {
             <div className="space-y-2 text-center">
               <h3 className="text-lg font-semibold">Vault Empty</h3>
               <p className="mx-auto max-w-xs text-sm leading-relaxed text-muted-foreground">
-                Your neural storage is currently offline. Upload documents to begin training your StudyOS command center.
+                Your neural storage is currently offline. Upload documents to begin training your SOLO TUTOR command center.
               </p>
             </div>
           </div>

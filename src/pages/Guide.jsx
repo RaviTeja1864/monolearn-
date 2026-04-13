@@ -21,7 +21,7 @@ const Guide = () => {
     {
       icon: CloudUpload,
       title: "1. Build Your Neural Vault",
-      desc: "Upload PDFs, lecture videos, or code snippets. Our system performs 'Neural Indexing' to create a semantic map of your data locally in your browser.",
+      desc: "Upload PDFs, lecture videos, or code snippets. SOLO TUTOR performs neural indexing to create a semantic map of your learning materials and keep them ready for downstream tools.",
       color: "text-red-400"
     },
     {
@@ -77,7 +77,7 @@ const Guide = () => {
         <div className="text-center space-y-4">
           <h3 className="text-3xl font-black tracking-tighter uppercase italic">The Neural Edge Architecture</h3>
           <p className="opacity-60 max-w-2xl mx-auto font-medium leading-relaxed">
-            Solo Tutor is built on a "Local-First" AI philosophy. Your data and intelligence never leave your browser.
+            SOLO TUTOR is built around a local-first workspace. Your vault stays local, while live integrations such as YouTube transcript retrieval run only when you trigger them.
           </p>
         </div>
 
@@ -88,7 +88,7 @@ const Guide = () => {
             </div>
             <div className="space-y-2">
               <h4 className="font-bold uppercase tracking-widest text-sm">Local Storage</h4>
-              <p className="text-xs opacity-50 leading-relaxed">Your files are encrypted and stored in indexedDB, giving you instant access with zero server latency.</p>
+              <p className="text-xs opacity-50 leading-relaxed">Your study assets stay local and are persisted in the browser for quick access between sessions.</p>
             </div>
           </div>
 
@@ -98,7 +98,7 @@ const Guide = () => {
             </div>
             <div className="space-y-2">
               <h4 className="font-bold uppercase tracking-widest text-sm">Edge Inference</h4>
-              <p className="text-xs opacity-50 leading-relaxed">AI processing happens on your local hardware using WASM-accelerated models for maximum privacy.</p>
+              <p className="text-xs opacity-50 leading-relaxed">Interactive features prioritize local UI speed, while live transcript fetches run through the SOLO TUTOR API when an external source is required.</p>
             </div>
           </div>
 
@@ -108,7 +108,7 @@ const Guide = () => {
             </div>
             <div className="space-y-2">
               <h4 className="font-bold uppercase tracking-widest text-sm">Zero-Knowledge</h4>
-              <p className="text-xs opacity-50 leading-relaxed">No tracking, no cloud syncing, no data mining. You own your intelligence, completely.</p>
+              <p className="text-xs opacity-50 leading-relaxed">No mandatory cloud sync for your vault. External requests happen only for the features that need outside content, such as YouTube caption retrieval.</p>
             </div>
           </div>
         </div>

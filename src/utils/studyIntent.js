@@ -1,8 +1,11 @@
-const PENDING_INTENT_KEY = 'studyos-pending-intent';
+const PENDING_INTENT_KEY = 'solo-tutor-pending-intent';
+const LEGACY_PENDING_INTENT_KEY = 'studyos-pending-intent';
 
 export const getPendingIntent = () => {
   try {
-    const raw = localStorage.getItem(PENDING_INTENT_KEY);
+    const raw =
+      localStorage.getItem(PENDING_INTENT_KEY) ||
+      localStorage.getItem(LEGACY_PENDING_INTENT_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
@@ -11,6 +14,7 @@ export const getPendingIntent = () => {
 
 export const clearPendingIntent = () => {
   localStorage.removeItem(PENDING_INTENT_KEY);
+  localStorage.removeItem(LEGACY_PENDING_INTENT_KEY);
 };
 
 export const setPendingIntent = (intent) => {
@@ -28,7 +32,7 @@ export const dispatchNavigationIntent = ({ page, status, payload = {} }) => {
   });
 
   window.dispatchEvent(
-    new CustomEvent('studyos:navigate', {
+    new CustomEvent('solo-tutor:navigate', {
       detail: {
         page,
         status,

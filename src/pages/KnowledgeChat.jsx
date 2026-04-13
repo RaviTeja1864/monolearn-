@@ -28,7 +28,7 @@ const KnowledgeChat = () => {
     {
       id: 'welcome',
       role: 'assistant',
-      content: "Hello! I'm your StudyOS tutor. Select some materials from your vault, and I'll help you understand them with citations.",
+      content: "Hello! I'm your SOLO TUTOR guide. Select some materials from your vault, and I'll help you understand them with citations.",
       timestamp: new Date()
     },
     ...(initialIntent?.payload?.message
@@ -270,7 +270,7 @@ const KnowledgeChat = () => {
           </div>
         </div>
         <p className="text-[10px] text-center text-muted-foreground mt-3 font-medium uppercase tracking-widest opacity-50">
-          Powered by StudyOS Intelligence • Realistic Mocks Enabled
+          Powered by SOLO TUTOR Intelligence
         </p>
       </div>
     </div>

@@ -47,10 +47,10 @@ function App() {
   }, []);
 
   useEffect(() => {
-    window.addEventListener('studyos:navigate', handleNavigationIntent);
+    window.addEventListener('solo-tutor:navigate', handleNavigationIntent);
 
     return () => {
-      window.removeEventListener('studyos:navigate', handleNavigationIntent);
+      window.removeEventListener('solo-tutor:navigate', handleNavigationIntent);
       window.clearTimeout(statusResetRef.current);
     };
   }, [handleNavigationIntent]);

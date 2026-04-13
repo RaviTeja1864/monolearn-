@@ -17,7 +17,8 @@ import {
 } from '../../utils/knowledgeGraph';
 import { cn } from '../../utils/cn';
 
-const MAP_STORAGE_KEY = 'studyos-vault-knowledge-map';
+const MAP_STORAGE_KEY = 'solo-tutor-vault-knowledge-map';
+const LEGACY_MAP_STORAGE_KEY = 'studyos-vault-knowledge-map';
 const createDefaultMapState = (signature) => ({
   signature,
   seed: Date.now() % 2147483647,
@@ -26,7 +27,9 @@ const createDefaultMapState = (signature) => ({
 
 const readStoredState = (signature) => {
   try {
-    const raw = localStorage.getItem(MAP_STORAGE_KEY);
+    const raw =
+      localStorage.getItem(MAP_STORAGE_KEY) ||
+      localStorage.getItem(LEGACY_MAP_STORAGE_KEY);
     const parsed = raw ? JSON.parse(raw) : null;
     const record = parsed?.[signature];
 

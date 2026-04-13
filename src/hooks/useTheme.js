@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 
+const THEME_KEY = 'solo-tutor-theme';
+const LEGACY_THEME_KEY = 'studyos-theme';
+
 export const useTheme = () => {
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('studyos-theme') || 'dark';
+    return localStorage.getItem(THEME_KEY) || localStorage.getItem(LEGACY_THEME_KEY) || 'dark';
   });
 
   useEffect(() => {
@@ -12,7 +15,7 @@ export const useTheme = () => {
     } else {
       root.classList.remove('dark');
     }
-    localStorage.setItem('studyos-theme', theme);
+    localStorage.setItem(THEME_KEY, theme);
   }, [theme]);
 
   const toggleTheme = () => {

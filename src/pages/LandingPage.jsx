@@ -16,9 +16,9 @@ import {
 
 const ScrollingText = () => {
   const items = [
-    "NEURAL INDEXING", "LOCAL-FIRST AI", "ZERO LATENCY", "ENCRYPTED VAULT", 
+    "NEURAL INDEXING", "LIVE TRANSCRIPTS", "ZERO LATENCY", "ENCRYPTED VAULT", 
     "CODE MENTOR", "VIDEO INTELLIGENCE", "ADAPTIVE QUIZ", "W3C COMPLIANT",
-    "DEEP FOCUS", "BROWSER-ONLY", "NEURAL SYNC", "PRIVATE LEARNING"
+    "DEEP FOCUS", "LOCAL-FIRST", "NEURAL SYNC", "PRIVATE LEARNING"
   ];
 
   return (
@@ -37,11 +37,11 @@ const ScrollingText = () => {
 const LandingPage = ({ onStart }) => {
   const features = [
     { icon: MessageSquare, title: "Neural Chat", desc: "Interact with your documents using context-aware AI." },
-    { icon: Play, title: "Video Intel", desc: "Extract insights and summaries from any educational video." },
+    { icon: Play, title: "Video Intel", desc: "Pull live YouTube transcripts and turn lectures into timestamped study notes." },
     { icon: Code, title: "Code Mentor", desc: "Real-time debugging and optimization with neural fixes." },
     { icon: HelpCircle, title: "Adaptive Quiz", desc: "Personalized testing to master your specific material." },
     { icon: FolderOpen, title: "Secure Vault", desc: "Encrypted storage for your entire knowledge base." },
-    { icon: Zap, title: "Fast Sync", desc: "Browser-only persistence with lightning speed." }
+    { icon: Zap, title: "Fast Sync", desc: "Local-first persistence with lightning-fast response." }
   ];
 
   return (
@@ -81,7 +81,7 @@ const LandingPage = ({ onStart }) => {
             <span className="text-muted-foreground/30">DIGITALLY ACCELERATED.</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-medium animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-200">
-            The ultimate browser-only educational workspace. Upload your materials, let the AI index your context, and master any subject with Solo Tutor.
+            A premium local-first educational workspace with live transcript analysis, contextual tools, and a private neural vault powered by SOLO TUTOR.
           </p>
         </div>
 
@@ -167,7 +167,7 @@ const LandingPage = ({ onStart }) => {
           <div className="space-y-6">
             <h2 className="text-4xl md:text-6xl font-black tracking-tighter leading-none">PRIVACY BY DEFAULT.<br />COMPUTED LOCALLY.</h2>
             <p className="text-lg opacity-60 font-medium leading-relaxed">
-              Solo Tutor processes your entire vault in the browser. Your data never leaves your device, ensuring total privacy for your sensitive study materials. No external servers, no cloud storage, no compromise.
+              SOLO TUTOR keeps your vault local-first while using live online retrieval only for features that require it, like YouTube transcript analysis. Your uploaded study materials remain stored on your machine unless you choose otherwise.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 pt-8">
