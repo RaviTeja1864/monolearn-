@@ -196,14 +196,19 @@ const KnowledgeChat = () => {
             </div>
             
             <div className="space-y-3">
-              <div className={cn(
-                "p-4 rounded-2xl text-[14px] leading-relaxed shadow-sm",
-                m.role === 'user' 
-                  ? "bg-foreground text-background font-medium rounded-tr-none" 
-                  : "bg-card border border-border/40 rounded-tl-none"
-              )}>
-                {m.content}
-              </div>
+              <div 
+                className={cn(
+                  "p-4 rounded-2xl text-[14px] leading-relaxed shadow-sm whitespace-pre-wrap",
+                  m.role === 'user' 
+                    ? "bg-foreground text-background font-medium rounded-tr-none" 
+                    : "bg-card border border-border/40 rounded-tl-none"
+                )}
+                dangerouslySetInnerHTML={{
+                  __html: m.content
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                }}
+              />
 
               {m.citations && m.citations.length > 0 && (
                 <div className="flex flex-wrap gap-2">

@@ -183,6 +183,7 @@ const LearningVault = () => {
                   : 'text';
 
           let preview = `Semantic preview extracted for ${file.name}. Neural parsing isolated the primary topics, examples, and revision cues.`;
+          let contentStr = '';
           
           if (type === 'pdf') {
             try {
@@ -199,7 +200,10 @@ const LearningVault = () => {
               });
               if (response.ok) {
                 const data = await response.json();
-                if (data.text) preview = data.text;
+                if (data.text) {
+                  contentStr = data.text;
+                  preview = data.text.substring(0, 150) + "...";
+                }
               }
             } catch (e) {
               console.warn("Failed to extract PDF", e);
@@ -213,6 +217,7 @@ const LearningVault = () => {
             subject: inferSubjectFromName(file.name),
             tags: inferTags(file.name, type),
             preview: preview,
+            content: contentStr,
           });
         }
 
@@ -334,12 +339,15 @@ const LearningVault = () => {
       }
 
       if (actionId === 'plan') {
-        setCommandFeedback({
-          title: 'Adaptive study plan drafted',
-          summary: `Built a recovery sprint around ${primarySubject} from ${activeScope.length} live source${activeScope.length === 1 ? '' : 's'}.`,
-          description:
-            'Sequence: concept sweep, active recall, one applied checkpoint, then a short consolidation loop before your next review window.',
-          pills: ['45 Minute Sprint', 'Adaptive', primarySubject],
+        dispatchNavigationIntent({
+          page: 'chat',
+          status: 'Plan context loaded',
+          payload: {
+            itemIds: scopeIds,
+            prompt: `Create a rigorous study plan for ${primarySubject} based on ${scopeNames.join(', ')}. Include a timeline, key concepts, and exact review checkpoints.`,
+            notice: `Drafting study plan for ${primarySubject}.`,
+            message: `I pulled in ${scopeNames.length} Vault asset(s) to generate your custom study plan.`,
+          },
         });
         return;
       }
