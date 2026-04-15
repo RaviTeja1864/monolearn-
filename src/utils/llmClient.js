@@ -137,7 +137,7 @@ export const getLLMResponse = async (prompt, maxTokens = 1000) => {
  */
 export const generateKnowledgeChatResponse = async (query, contextDocs = []) => {
   const contextText = contextDocs
-    .map((doc) => `<document name="${doc.name}" type="${doc.type}">\n${doc.content}\n</document>`)
+    .map((doc) => `<document name="${doc.name}" type="${doc.type}">\n${doc.content || doc.preview || ''}\n</document>`)
     .join('\n\n');
 
   const prompt = `You are an expert tutor. Answer the following question based on the provided materials.
