@@ -201,16 +201,14 @@ const transcribeAudioWithGoogleCloud = async (audioFilePath) => {
 const generateTranscriptWithFallback = async (url) => {
   // First, try to get YouTube captions
   try {
-    const transcript = await fetchPreferredTranscript(url);
-    return transcript;
+    return await fetchPreferredTranscript(url);
   } catch (youtubeError) {
     // If YouTube captions are disabled and we have Google Cloud configured, try STT
     if (speechClient) {
       try {
         console.log('YouTube captions unavailable. Attempting audio transcription...');
         const audioPath = await downloadYouTubeAudio(url);
-        const transcript = await transcribeAudioWithGoogleCloud(audioPath);
-        return transcript;
+        return await transcribeAudioWithGoogleCloud(audioPath);
       } catch (sttError) {
         // If STT also fails, throw the original YouTube error for better UX
         throw youtubeError;
