@@ -96,7 +96,7 @@ const KnowledgeChat = () => {
       setMessages(prev => [...prev, {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: "I encountered an error trying to process this with Ollama. Make sure the local server is running!",
+        content: `I encountered an error trying to process this with Ollama: ${e.message}`,
         citations: [],
         timestamp: new Date()
       }]);
