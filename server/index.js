@@ -49,6 +49,9 @@ const sendJson = (response, statusCode, payload) => {
   response.writeHead(statusCode, {
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-store',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   });
   response.end(JSON.stringify(payload));
 };
@@ -274,6 +277,7 @@ const serveStaticAsset = async (pathname, response) => {
   const extension = path.extname(resolvedPath);
   response.writeHead(200, {
     'Content-Type': MIME_TYPES[extension] || 'application/octet-stream',
+    'Access-Control-Allow-Origin': '*',
   });
   createReadStream(resolvedPath).pipe(response);
   return true;
@@ -285,6 +289,7 @@ const serveIndex = async (response) => {
 
   response.writeHead(200, {
     'Content-Type': 'text/html; charset=utf-8',
+    'Access-Control-Allow-Origin': '*',
   });
   response.end(html);
 };
