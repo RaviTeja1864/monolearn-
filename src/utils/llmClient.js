@@ -26,6 +26,8 @@ export const streamLLMResponse = async (prompt, maxTokens = 1000, onChunk = null
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'bypass-tunnel-reminder': 'true',
+        'ngrok-skip-browser-warning': 'true'
       },
       body: JSON.stringify({
         model: DEFAULT_MODEL,
@@ -98,6 +100,8 @@ export const getLLMResponse = async (prompt, maxTokens = 1000) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'bypass-tunnel-reminder': 'true',
+        'ngrok-skip-browser-warning': 'true'
       },
       body: JSON.stringify({
         model: DEFAULT_MODEL,

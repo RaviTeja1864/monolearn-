@@ -113,7 +113,12 @@ const VideoHub = () => {
 
     try {
       const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
-      const response = await fetch(`${apiBase}/api/youtube/analyze?url=${encodeURIComponent(url.trim())}`);
+      const response = await fetch(`${apiBase}/api/youtube/analyze?url=${encodeURIComponent(url.trim())}`, {
+        headers: {
+          'bypass-tunnel-reminder': 'true',
+          'ngrok-skip-browser-warning': 'true'
+        }
+      });
       const payload = await response.json();
 
       if (!response.ok) {

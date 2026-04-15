@@ -113,6 +113,8 @@ const QuizLab = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'bypass-tunnel-reminder': 'true',
+          'ngrok-skip-browser-warning': 'true'
         },
         body: JSON.stringify({
           context,
