@@ -3,13 +3,14 @@
  * Provides utilities for chat, code analysis, quiz generation, and more
  */
 
-const XAI_API_KEY = process.env.XAI_API_KEY || '';
-const XAI_API_BASE = 'https://api.x.ai/v1';
-const DEFAULT_MODEL = 'grok-2';
+const XAI_API_KEY = process.env.XAI_API_KEY || import.meta.env.VITE_XAI_API_KEY || '';
+const XAI_API_BASE = import.meta.env.VITE_API_BASE 
+  ? `${import.meta.env.VITE_API_BASE}/api`
+  : 'http://localhost:8000/api';
+const DEFAULT_MODEL = 'qwen2.5-coder:3b-instruct-q4_K_M';
 
-if (!XAI_API_KEY) {
-  console.warn('⚠️  XAI_API_KEY not configured. LLM features will not work.');
-}
+// Note: Ensure the API key checks don't block requests if we rely on a local backend without keys.
+
 
 /**
  * Make a streaming request to xAI API
@@ -19,16 +20,12 @@ if (!XAI_API_KEY) {
  * @returns {Promise<string>} Full response text
  */
 export const streamLLMResponse = async (prompt, maxTokens = 1000, onChunk = null) => {
-  if (!XAI_API_KEY) {
-    throw new Error('XAI_API_KEY not configured');
-  }
 
   try {
     const response = await fetch(`${XAI_API_BASE}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${XAI_API_KEY}`,
       },
       body: JSON.stringify({
         model: DEFAULT_MODEL,
@@ -95,16 +92,12 @@ export const streamLLMResponse = async (prompt, maxTokens = 1000, onChunk = null
  * @returns {Promise<string>} Response text
  */
 export const getLLMResponse = async (prompt, maxTokens = 1000) => {
-  if (!XAI_API_KEY) {
-    throw new Error('XAI_API_KEY not configured');
-  }
 
   try {
     const response = await fetch(`${XAI_API_BASE}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${XAI_API_KEY}`,
       },
       body: JSON.stringify({
         model: DEFAULT_MODEL,

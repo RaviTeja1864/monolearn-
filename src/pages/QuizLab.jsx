@@ -108,7 +108,8 @@ const QuizLab = () => {
         return;
       }
 
-      const response = await fetch('/api/quiz/generate', {
+      const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+      const response = await fetch(`${apiBase}/api/quiz/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -112,7 +112,8 @@ const VideoHub = () => {
     setCopyState('');
 
     try {
-      const response = await fetch(`/api/youtube/analyze?url=${encodeURIComponent(url.trim())}`);
+      const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+      const response = await fetch(`${apiBase}/api/youtube/analyze?url=${encodeURIComponent(url.trim())}`);
       const payload = await response.json();
 
       if (!response.ok) {
