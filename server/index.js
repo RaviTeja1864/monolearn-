@@ -47,8 +47,20 @@ const fetchYouTubeMetadata = async (url) => {
 const fetchPreferredTranscript = async (url) => {
   try {
     return await fetchTranscript(url, { lang: 'en' });
-  } catch {
-    return fetchTranscript(url);
+  } catch (error) {
+    try {
+      return await fetchTranscript(url);
+    } catch (fallbackError) {
+      const errorMessage = fallbackError?.message || String(fallbackError);
+      if (
+        errorMessage.includes('disabled') ||
+        errorMessage.includes('not available') ||
+        errorMessage.includes('No transcripts')
+      ) {
+        throw new Error('Transcripts are disabled on this video.');
+      }
+      throw fallbackError;
+    }
   }
 };
 
@@ -146,6 +158,19 @@ const server = http.createServer(async (request, response) => {
   }
 
   sendJson(response, 404, { error: 'Not found.' });
+});
+
+server.on('error', (error) => {
+  if (error && error.code === 'EADDRINUSE') {
+    console.error(
+      `Port ${PORT} is already in use. Set PORT to another value or use "npm run dev" to auto-select an open port.`,
+    );
+    process.exit(1);
+    return;
+  }
+
+  console.error(error);
+  process.exit(1);
 });
 
 server.listen(PORT, () => {
