@@ -178,3 +178,36 @@ Return ONLY a valid JSON array with this structure:
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
     return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+@csrf_exempt
+def pdf_extract(request):
+    if request.method == 'POST':
+        try:
+            if 'file' not in request.FILES:
+                return JsonResponse({'error': 'No file uploaded'}, status=400)
+            
+            uploaded_file = request.FILES['file']
+            
+            import PyPDF2
+            import io
+            
+            pdf_reader = PyPDF2.PdfReader(uploaded_file)
+            text = []
+            
+            # Read first 10 pages max to save token size
+            num_pages = min(10, len(pdf_reader.pages))
+            for i in range(num_pages):
+                page = pdf_reader.pages[i]
+                text.append(page.extract_text())
+                
+            full_text = "\n".join(text)
+            
+            return JsonResponse({
+                'text': full_text[:4000], # Trucate for local LLMs
+                'pages': len(pdf_reader.pages)
+            })
+            
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+

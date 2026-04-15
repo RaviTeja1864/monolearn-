@@ -170,8 +170,8 @@ const LearningVault = () => {
 
       setIsUploading(true);
 
-      window.setTimeout(() => {
-        Array.from(files).forEach((file) => {
+      window.setTimeout(async () => {
+        for (const file of Array.from(files)) {
           const type = file.type.includes('pdf')
             ? 'pdf'
             : file.type.includes('video')
@@ -182,20 +182,44 @@ const LearningVault = () => {
                   ? 'code'
                   : 'text';
 
+          let preview = `Semantic preview extracted for ${file.name}. Neural parsing isolated the primary topics, examples, and revision cues.`;
+          
+          if (type === 'pdf') {
+            try {
+              const formData = new FormData();
+              formData.append('file', file);
+              const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+              const response = await fetch(`${apiBase}/api/pdf/extract`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                  'bypass-tunnel-reminder': 'true',
+                  'ngrok-skip-browser-warning': 'true'
+                }
+              });
+              if (response.ok) {
+                const data = await response.json();
+                if (data.text) preview = data.text;
+              }
+            } catch (e) {
+              console.warn("Failed to extract PDF", e);
+            }
+          }
+
           addItem({
             name: file.name,
             type,
             size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
             subject: inferSubjectFromName(file.name),
             tags: inferTags(file.name, type),
-            preview: `Semantic preview extracted for ${file.name}. Neural parsing isolated the primary topics, examples, and revision cues.`,
+            preview: preview,
           });
-        });
+        }
 
         setIsUploading(false);
         setIsDragging(false);
         if (fileInputRef.current) fileInputRef.current.value = '';
-      }, 1200);
+      }, 100);
     },
     [addItem],
   );
