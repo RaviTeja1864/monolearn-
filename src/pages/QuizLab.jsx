@@ -33,7 +33,7 @@ const buildQuizQuestions = (subjectFocus) => {
     {
       id: 2,
       subject: 'Operating Systems',
-      question: "What is the primary difference between a Monolithic Kernel and a Microkernel?",
+      question: "What is the primary difference between a Monolithic Kernel and Microkernels?",
       options: [
         "Monolithic kernels are faster but harder to debug",
         "Microkernels run all services in user space",
