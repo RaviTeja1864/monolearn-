@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { generateKnowledgeChatResponse } from '../utils/llmClient';
 import { 
   Send, 
   Mic, 
@@ -81,36 +82,30 @@ const KnowledgeChat = () => {
     setInput('');
     setIsThinking(true);
 
-    // Mock AI Response Logic
-    setTimeout(() => {
-      const aiResponse = generateMockResponse(input, selectedContext);
+    // Actual LLM Response Logic
+    try {
+      const aiResponse = await generateKnowledgeChatResponse(input, selectedContext);
       setMessages(prev => [...prev, {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: aiResponse.content,
-        citations: aiResponse.citations,
+        content: aiResponse,
+        citations: selectedContext.map(c => ({ name: c.name, snippet: `From: ${c.name}` })),
         timestamp: new Date()
       }]);
+    } catch (e) {
+      setMessages(prev => [...prev, {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: "I encountered an error trying to process this with Ollama. Make sure the local server is running!",
+        citations: [],
+        timestamp: new Date()
+      }]);
+    } finally {
       setIsThinking(false);
-    }, 1200);
-  };
-
-  const generateMockResponse = (query, context) => {
-    if (context.length === 0) {
-      return {
-        content: "I've analyzed your question, but I don't have any specific documents selected as context. Please attach a few files from your vault so I can give you a grounded answer.",
-        citations: []
-      };
     }
-
-    const contextNames = context.map(c => c.name).join(', ');
-    const firstFile = context[0];
-    
-    return {
-      content: `Based on the materials you've provided (${contextNames}), I can explain this for you. In ${firstFile.name}, it's mentioned that the core principles involve high efficiency and modularity. This aligns with the standard theoretical models we've discussed in our previous sessions.`,
-      citations: context.map(c => ({ name: c.name, snippet: `From: ${c.name}` }))
-    };
   };
+
+
 
   const toggleContext = (item) => {
     setSelectedContext(prev => 
