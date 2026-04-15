@@ -6,11 +6,32 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { fetchTranscript } from 'youtube-transcript/dist/youtube-transcript.esm.js';
 import { buildVideoAnalysis, extractYouTubeVideoId } from '../src/utils/videoIntelligence.js';
+import { Speech } from '@google-cloud/speech';
+import { exec } from 'node:child_process';
+import { promisify } from 'node:util';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const distDir = path.resolve(__dirname, '../dist');
 const PORT = Number(process.env.PORT || 8787);
+
+// Google Cloud Speech-to-Text setup
+const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID;
+const keyFilePath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+let speechClient = null;
+
+if (projectId && keyFilePath) {
+  try {
+    speechClient = new Speech.SpeechClient({
+      projectId,
+      keyFilename: keyFilePath,
+    });
+  } catch (error) {
+    console.warn('Failed to initialize Google Cloud Speech-to-Text:', error.message);
+  }
+} else {
+  console.warn('Google Cloud Speech-to-Text not configured. Videos with disabled captions will not be transcribed.');
+}
 
 const MIME_TYPES = {
   '.css': 'text/css; charset=utf-8',
@@ -64,6 +85,143 @@ const fetchPreferredTranscript = async (url) => {
   }
 };
 
+const downloadYouTubeAudio = async (url) => {
+  const tmpDir = path.join(__dirname, '.tmp');
+
+  // Create temp directory if it doesn't exist
+  try {
+    await fs.mkdir(tmpDir, { recursive: true });
+  } catch {
+    // Directory might already exist
+  }
+
+  const audioFilePath = path.join(tmpDir, `audio-${Date.now()}.m4a`);
+  const execPromise = promisify(exec);
+
+  try {
+    // Download audio using youtube-dl
+    const command = `yt-dlp -f 251 -x --audio-format m4a --audio-quality 0 -o "${audioFilePath}" "${url}"`;
+    await execPromise(command);
+
+    // Verify file exists
+    if (!existsSync(audioFilePath)) {
+      throw new Error('Failed to download audio from YouTube');
+    }
+
+    return audioFilePath;
+  } catch (error) {
+    throw new Error(`Failed to download YouTube audio: ${error.message}`);
+  }
+};
+
+const transcribeAudioWithGoogleCloud = async (audioFilePath) => {
+  if (!speechClient) {
+    throw new Error('Google Cloud Speech-to-Text is not configured');
+  }
+
+  try {
+    // Read audio file
+    const audioFile = await fs.readFile(audioFilePath);
+    const audioBytes = audioFile.toString('base64');
+
+    // Send to Google Cloud Speech-to-Text API
+    const request = {
+      audio: { content: audioBytes },
+      config: {
+        encoding: 'M4A',
+        languageCode: 'en-US',
+        enableAutomaticPunctuation: true,
+        enableWordTimeOffsets: true,
+      },
+    };
+
+    const [operation] = await speechClient.longRunningRecognize(request);
+    const [response] = await operation.promise();
+
+    // Convert Google Cloud format to YouTube-compatible format
+    const transcript = [];
+    let currentOffset = 0;
+
+    for (const result of response.results) {
+      for (const alternative of result.alternatives) {
+        if (!alternative.words || alternative.words.length === 0) {
+          // Handle case with no word timing
+          if (alternative.transcript) {
+            transcript.push({
+              text: alternative.transcript,
+              offset: currentOffset,
+              duration: 1000, // Default 1 second
+            });
+          }
+        } else {
+          // Process words with timing
+          for (const word of alternative.words) {
+            const startTime = word.startTime?.seconds || 0;
+            const startNanos = word.startTime?.nanos || 0;
+            const endTime = word.endTime?.seconds || 0;
+            const endNanos = word.endTime?.nanos || 0;
+
+            const offset = startTime * 1000 + Math.floor(startNanos / 1000000);
+            const endOffset = endTime * 1000 + Math.floor(endNanos / 1000000);
+            const duration = Math.max(endOffset - offset, 100);
+
+            transcript.push({
+              text: word.word,
+              offset,
+              duration,
+            });
+          }
+        }
+      }
+    }
+
+    // Clean up temp file
+    try {
+      await fs.unlink(audioFilePath);
+    } catch {
+      // File already deleted or doesn't exist
+    }
+
+    if (transcript.length === 0) {
+      throw new Error('No speech detected in audio');
+    }
+
+    return transcript;
+  } catch (error) {
+    // Clean up temp file on error
+    try {
+      await fs.unlink(audioFilePath);
+    } catch {
+      // Ignore cleanup errors
+    }
+    throw new Error(`Speech-to-text transcription failed: ${error.message}`);
+  }
+};
+
+const generateTranscriptWithFallback = async (url) => {
+  // First, try to get YouTube captions
+  try {
+    const transcript = await fetchPreferredTranscript(url);
+    return transcript;
+  } catch (youtubeError) {
+    // If YouTube captions are disabled and we have Google Cloud configured, try STT
+    if (speechClient) {
+      try {
+        console.log('YouTube captions unavailable. Attempting audio transcription...');
+        const audioPath = await downloadYouTubeAudio(url);
+        const transcript = await transcribeAudioWithGoogleCloud(audioPath);
+        return transcript;
+      } catch (sttError) {
+        // If STT also fails, throw the original YouTube error for better UX
+        throw youtubeError;
+      }
+    } else {
+      // No fallback available
+      throw youtubeError;
+    }
+  }
+};
+
 const handleAnalyze = async (requestUrl, response) => {
   const sourceUrl = requestUrl.searchParams.get('url');
 
@@ -82,7 +240,7 @@ const handleAnalyze = async (requestUrl, response) => {
   try {
     const [metadata, transcript] = await Promise.all([
       fetchYouTubeMetadata(sourceUrl),
-      fetchPreferredTranscript(sourceUrl),
+      generateTranscriptWithFallback(sourceUrl),
     ]);
 
     if (!Array.isArray(transcript) || transcript.length === 0) {
